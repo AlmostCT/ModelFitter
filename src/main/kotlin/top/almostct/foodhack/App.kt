@@ -80,7 +80,7 @@ fun main(args : Array<String>) {
 
 fun sentenceToDataset(sentenceSize : Int, sentence : String, map : HashMap<String, Int>) : INDArray {
     val data = IntArray(sentenceSize, {i -> map.size})
-    val words = sentence.split(Pattern.compile("\\s"))
+    val words = sentence.toLowerCase().split(Pattern.compile("\\s"))
     for (i in 0 until sentenceSize) {
         if (i < words.size) {
             if (map.containsKey(words[i])) {

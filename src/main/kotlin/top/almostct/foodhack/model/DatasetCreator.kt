@@ -17,7 +17,7 @@ class DatasetCreator(private val inputStream : InputStream) {
 
     fun transform(sentenceSize : Int) : DataSetIterator {
         val result = BufferedReader(InputStreamReader(inputStream))
-                .lines().map { t -> t.split(',') }.toList()
+                .lines().map{t -> t.toLowerCase()}.map { t -> t.split(',') }.toList()
 
         val data = result.map { t -> t[0]}.toList()
         val labels = result.map { t -> t[1].toInt() }.toList()
