@@ -18,6 +18,8 @@ import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.lossfunctions.LossFunctions
 import org.nd4j.linalg.lossfunctions.impl.LossMCXENT
 import top.almostct.foodhack.model.DatasetCreator
+import java.io.BufferedWriter
+import java.io.FileWriter
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
@@ -26,12 +28,22 @@ import java.util.regex.Pattern
 fun main(args : Array<String>) {
     Thread.currentThread().contextClassLoader.getResourceAsStream("rawDataset.csv").use { inputStream ->
         val sentenceSize = 10
+        val classesCount = 6
         val creator = DatasetCreator(inputStream)
         val datasetIterator = creator.transform(sentenceSize)
+
+        BufferedWriter(FileWriter("mapInfo.txt")).use { writer ->
+            writer.write("${sentenceSize}\n")
+            writer.write("${classesCount}\n")
+            for (kvp in creator.map) {
+                writer.write("${kvp.key},${kvp.value}\n")
+            }
+        }
+
         println(creator.map.size)
         val dataset = datasetIterator;
 
-        var model = getModel(creator.map.size + 1, 4)
+        var model = getModel(creator.map.size + 1, classesCount)
         val outputPath = Paths.get("Models")
 
         if (Files.exists(outputPath.resolve("CommandsRecognition.zip"))) {
@@ -49,11 +61,10 @@ fun main(args : Array<String>) {
 
         }
 
-        val array = sentenceToDataset(sentenceSize, "А дальше то что следует сделать", creator.map)
+        val array = sentenceToDataset(sentenceSize, "Сколько времени", creator.map)
         val output = model.rnnTimeStep(array)
         val lastTimeStep = output[0].tensorAlongDimension(sentenceSize - 1,1,0)
 
-        val classesCount = 4
         var curIdx = 0
         var curValue = lastTimeStep.getDouble(0)
 
